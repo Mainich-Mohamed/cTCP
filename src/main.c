@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <net/if.h>
 #include "tap.h"
+#include "utils.h"
 
 int main(int argc, char *argv[]) {
   char dev_name[IFNAMSIZ] = "tap0";
@@ -32,6 +33,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Caught a packet! Length: %zd bytes\n", nbytes);
+
+    print_hex_dump(buffer, nbytes);
   }
 
   close(tap_fd);
