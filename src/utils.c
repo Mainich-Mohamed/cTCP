@@ -15,7 +15,7 @@ void print_hex_dump(const unsigned char *buffer, size_t length) {
       }
     }
 
-    printf("   ");
+    printf(" | ");
     
     for (size_t j = 0; j < 16; j++) {
       if (i + j < length) {
