@@ -13,13 +13,13 @@ int main(int argc, char *argv[]) {
   printf("Attempting to create interface...\n");
 
   tap_fd = tap_alloc(dev_name);
-  if (tap_fd < 0) {
-    printf("Fatal: Could not create interface\n");
-    exit(1);
-  }
+    if (tap_fd < 0) {
+      printf("Fatal: Could not create interface\n");
+      exit(1);
+    }
 
-  printf("Successfully allocated TAP interface: %s\n", dev_name);
-  printf("Listening for raw packets...\n");
+    printf("Successfully allocated TAP interface: %s\n", dev_name);
+    printf("Listening for raw packets...\n");
 
   // Buffer that holds the raw bytes of an incomimg packet (standard Ethernet MTU is 1500)
   uint8_t buffer[1522];
