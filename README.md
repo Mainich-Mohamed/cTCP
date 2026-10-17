@@ -109,16 +109,6 @@ ping 10.0.0.2          # host sends ARP requests for 10.0.0.2 onto tap0
 
 Until ARP replies are implemented, the ping won't get answers, but every frame will be dumped and decoded.
 
-## Roadmap
-
-- [ ] ARP: parse requests and replies, maintain the cache, reply for our own IP
-- [ ] Wire ARP into the Ethernet dispatcher and give `main.c` a configured `netif`
-- [ ] IPv4: header parsing, checksum validation, protocol dispatch
-- [ ] ICMP echo reply, so `ping` works
-- [ ] UDP
-- [ ] TCP: state machine, sequence numbers, retransmission
-- [ ] A minimal socket-like API on top
-
 ## References
 
 - [RFC 826: An Ethernet Address Resolution Protocol](https://datatracker.ietf.org/doc/html/rfc826)
