@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#incldue "arp.h"
+#include "arp.h"
 #include "netif.h"
 #include "ethernet.h"
 

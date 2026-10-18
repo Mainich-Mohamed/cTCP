@@ -36,4 +36,10 @@ struct arp_entry {
   uint8_t valid; /* 1 == slot occupied, 0 == free */
 };
 
+struct netif;
+
+void arp_recv(struct netif *netif, const uint8_t *payload, ssize_t len);
+int arp_cache_lookup(uint32_t ip, uint8_t *mac_out);
+void arp_cache_dump(void);
+
 #endif

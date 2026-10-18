@@ -26,3 +26,7 @@ cTCP
 *.user
 .DS_Store
 Thumbs.db
+
+# Others
+CLAUDE.md
+brag-output/

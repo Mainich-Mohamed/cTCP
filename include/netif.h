@@ -2,7 +2,6 @@
 #define NETIF_H
 
 #include "ethernet.h"
-#include <cstdint>
 #include <stdint.h>
 
 struct netif {
