@@ -98,3 +98,67 @@ void arp_cache_dump(void) {
            (unsigned long long)((now - cache[i].confirmed_ms) / 1000));
   }
 }
+
+/* Formats a MAC as "AA:BB:CC:DD:EE:FF"; buf needs at least 18 bytes */
+static const char *arp_mac_str(const uint8_t *mac, char *buf, size_t size) {
+  snprintf(buf, size, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2],
+           mac[3], mac[4], mac[5]);
+  return buf;
+}
+
+/* Entry point for an ARP packet handed up by eth_recv().
+ *
+ * payload points just past the Ethernet header. len can be larger than
+ * ARP_HDR_LEN: Ethernet pads short frames up to its 46-byte minimum payload.
+ */
+void arp_recv(struct netif *netif, const uint8_t *payload, ssize_t len) {
+  if (len < ARP_HDR_LEN) {
+    printf("[ARP] Truncated packet: %zd bytes, minimum is %d - discarding\n",
+           len, ARP_HDR_LEN);
+    return;
+  }
+
+  /* Safe after the length check; packed struct, so no alignment padding */
+  const struct arp_hdr *arp = (const struct arp_hdr *)payload;
+
+  uint16_t htype = ntohs(arp->htype);
+  uint16_t ptype = ntohs(arp->ptype);
+
+  /* Only Ethernet/IPv4 ARP is supported: anything else would make the
+   * fixed-size sha/spa/tha/tpa fields of struct arp_hdr meaningless */
+  if (htype != ARP_HTYPE_ETH || ptype != ARP_PTYPE_IPV4 ||
+      arp->hlen != ARP_HLEN_ETH || arp->plen != ARP_PLEN_IPV4) {
+    printf("[ARP] Unsupported: htype=%u ptype=0x%04X hlen=%u plen=%u"
+           " - discarding\n",
+           htype, ptype, arp->hlen, arp->plen);
+    return;
+  }
+
+  /* Kept in network byte order, like netif->ip; memcpy because spa/tpa
+   * are byte arrays inside a packed struct, not aligned uint32_t */
+  uint32_t spa, tpa;
+  memcpy(&spa, arp->spa, sizeof(spa));
+  memcpy(&tpa, arp->tpa, sizeof(tpa));
+
+  char spa_str[INET_ADDRSTRLEN], tpa_str[INET_ADDRSTRLEN], sha_str[18];
+  inet_ntop(AF_INET, &spa, spa_str, sizeof(spa_str));
+  inet_ntop(AF_INET, &tpa, tpa_str, sizeof(tpa_str));
+  arp_mac_str(arp->sha, sha_str, sizeof(sha_str));
+
+  uint16_t oper = ntohs(arp->oper);
+
+  switch (oper) {
+  case ARP_OP_REQUEST:
+    printf("[ARP] Request: who-has %s tell %s (%s)\n", tpa_str, spa_str,
+           sha_str);
+    break;
+
+  case ARP_OP_REPLY:
+    printf("[ARP] Reply: %s is-at %s\n", spa_str, sha_str);
+    break;
+
+  default:
+    printf("[ARP] Unknown opcode %u - discarding\n", oper);
+    break;
+  }
+}
