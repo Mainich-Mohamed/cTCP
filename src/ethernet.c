@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 #include "ethernet.h"
+#include "netif.h"
 
 static void eth_print_mac(const uint8_t *mac) {
   printf("%02X:%02X:%02X:%02X:%02X:%02X", 
@@ -16,7 +17,7 @@ static void eth_print_mac(const uint8_t *mac) {
  *   frame[12..13] → EtherType (big-endian)
  *   frame[14..]   → Payload (handed off to next layer)
  */
-void eth_recv(const uint8_t *frame, ssize_t len) {
+void eth_recv(struct netif *netif, const uint8_t *frame, ssize_t len) {
   if (len < ETH_HDR_LEN) {
     printf("[ETH] Runt frame: %zd bytes, minimum is %d - discarding\n",
            len, ETH_HDR_LEN);

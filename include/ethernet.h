@@ -30,6 +30,8 @@ struct eth_hdr {
 } __attribute__((packed));
 
 /* --- Public API -------------------- */
-void eth_recv(const uint8_t *frame, ssize_t len);
+struct netif;
+
+void eth_recv(struct netif *netif, const uint8_t *frame, ssize_t len);
 
 #endif
