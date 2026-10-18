@@ -16,6 +16,12 @@
 
 #define ARP_CACHE_SIZE 32
 
+/* An entry not confirmed by an ARP packet for this long is expired.
+ * #ifndef so a test can override it with a short value. */
+#ifndef ARP_CACHE_TTL_MS
+#define ARP_CACHE_TTL_MS 60000
+#endif
+
 /* --- ARP Header ---------------------------- */
 struct arp_hdr {
   uint16_t htype;
@@ -34,6 +40,9 @@ struct arp_entry {
   uint32_t ip;
   uint8_t mac[ETH_MAC_LEN];
   uint8_t valid; /* 1 == slot occupied, 0 == free */
+  uint64_t
+      confirmed_ms; /* Last time an ARP packet confirmed the mapping (aging) */
+  uint64_t used_ms; /* Last time the mapping was inserted or looked up (LRU) */
 };
 
 struct netif;
