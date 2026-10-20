@@ -159,6 +159,48 @@ void arp_recv(struct netif *netif, const uint8_t *payload, ssize_t len) {
 
   default:
     printf("[ARP] Unknown opcode %u - discarding\n", oper);
-    break;
+    return; /* Dropped before the cache update: stricter than RFC 826 */
+  }
+
+  /* --- Sender sanity checks ------------------------------------- */
+
+  /* Bit 0 of the first byte marks a group (broadcast/multicast) address,
+   * which no real NIC has. Cheap guard against cache poisoning */
+  if (arp->sha[0] & 0x01) {
+    printf("[ARP] Sender MAC %s is broadcast/multicast - discarding\n",
+           sha_str);
+    return;
+  }
+
+  /* Someone else claims our IP: address conflict. Never cache our own IP */
+  if (spa == netif->ip) {
+    printf("[ARP] Address conflict: %s claims our IP %s - discarding\n",
+           sha_str, spa_str);
+    return;
+  }
+
+  /* --- Cache update: RFC 826 receive algorithm ------------------ */
+
+  int for_us = (tpa == netif->ip);
+
+  /* An ARP probe (RFC 5227) has sender IP 0.0.0.0: nothing to learn */
+  if (spa != 0) {
+    int merge = arp_cache_find(spa) >= 0; /* Sender already known? */
+
+    /* Known senders are refreshed by any packet; unknown senders are only
+     * learned from packets aimed at us. insert() refreshes in place */
+    if (merge || for_us) {
+      arp_cache_insert(spa, arp->sha);
+    }
+  }
+
+  if (!for_us)
+    return;
+
+  arp_cache_dump();
+
+  /* RFC 826: only now look at the opcode */
+  if (oper == ARP_OP_REQUEST) {
+    printf("[ARP] Request is for us - reply not implemented yet\n");
   }
 }
