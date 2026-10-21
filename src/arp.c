@@ -106,6 +106,30 @@ static const char *arp_mac_str(const uint8_t *mac, char *buf, size_t size) {
   return buf;
 }
 
+/* Answers a request for our IP with "netif->ip is-at netif->mac".
+ * The requester's addresses become the target fields, and the reply goes
+ * unicast to its MAC. Returns 0 if the frame was written, -1 if not. */
+static int arp_send_reply(struct netif *netif, const struct arp_hdr *req) {
+  struct arp_hdr reply;
+
+  reply.htype = htons(ARP_HTYPE_ETH);
+  reply.ptype = htons(ARP_PTYPE_IPV4);
+  reply.hlen = ARP_HLEN_ETH;
+  reply.plen = ARP_PLEN_IPV4;
+  reply.oper = htons(ARP_OP_REPLY);
+
+  /* Sender = us. netif->ip is already in network byte order: copy, no htonl */
+  memcpy(reply.sha, netif->mac, ETH_MAC_LEN);
+  memcpy(reply.spa, &netif->ip, sizeof(reply.spa));
+
+  /* Target = whoever asked */
+  memcpy(reply.tha, req->sha, ETH_MAC_LEN);
+  memcpy(reply.tpa, req->spa, sizeof(reply.tpa));
+
+  return eth_send(netif, req->sha, ETHERNET_ARP, (const uint8_t *)&reply,
+                  sizeof(reply));
+}
+
 /* Entry point for an ARP packet handed up by eth_recv().
  *
  * payload points just past the Ethernet header. len can be larger than
@@ -201,6 +225,11 @@ void arp_recv(struct netif *netif, const uint8_t *payload, ssize_t len) {
 
   /* RFC 826: only now look at the opcode */
   if (oper == ARP_OP_REQUEST) {
-    printf("[ARP] Request is for us - reply not implemented yet\n");
+    char our_mac_str[18];
+
+    if (arp_send_reply(netif, arp) == 0)
+      printf("[ARP] Reply sent: %s is-at %s -> %s\n", tpa_str,
+             arp_mac_str(netif->mac, our_mac_str, sizeof(our_mac_str)),
+             sha_str);
   }
 }
