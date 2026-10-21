@@ -33,5 +33,7 @@ struct eth_hdr {
 struct netif;
 
 void eth_recv(struct netif *netif, const uint8_t *frame, ssize_t len);
+int eth_send(struct netif *netif, const uint8_t *dst_mac, uint16_t ethertype,
+             const uint8_t *payload, size_t len);
 
 #endif
