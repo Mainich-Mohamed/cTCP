@@ -2,8 +2,7 @@
 
 A TCP/IP stack written from scratch in C, running entirely in userspace.
 
-https://github.com/user-attachments/assets/7d8e7c74-f925-4d2b-bbe4-0f044b506145
-
+https://github.com/user-attachments/assets/d27cccd8-249b-432e-ac5d-3f1c90edc5e1
 
 cTCP opens a Linux TAP interface, reads raw Ethernet frames straight off the wire, parses every protocol layer by hand, and builds its replies byte by byte. It uses no kernel networking stack and no third-party libraries: just the RFCs, `read()`, and `write()`.
 
