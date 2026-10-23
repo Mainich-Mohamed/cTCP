@@ -1,5 +1,6 @@
 #include "ethernet.h"
 #include "arp.h"
+#include "ipv4.h"
 #include "netif.h"
 #include <arpa/inet.h>
 #include <stdint.h>
@@ -55,6 +56,7 @@ void eth_recv(struct netif *netif, const uint8_t *frame, ssize_t len) {
 
   case ETHERNET_IPV4:
     printf("-> IPv4\n");
+    ipv4_recv(netif, payload, payload_len);
     break;
 
   case ETHERNET_IPV6:

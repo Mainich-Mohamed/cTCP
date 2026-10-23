@@ -1,7 +1,10 @@
 #ifndef IPV4_H
 #define IPV4_H
 
+#include "ethernet.h"
 #include <stdint.h>
+#include <stdio.h>
+#include <sys/types.h>
 
 /* --- IPv4 constants ---------------------------- */
 #define IPV4_HDR_MIN_LEN 20 /* IHL = 5: no options */
@@ -31,5 +34,9 @@ struct ipv4_hdr {
   uint8_t saddr[4];    /* Source address */
   uint8_t daddr[4];    /* Destination address */
 } __attribute__((packed));
+
+struct netif;
+
+void ipv4_recv(struct netif *netif, const uint8_t *payload, ssize_t len);
 
 #endif
