@@ -1,7 +1,6 @@
 #ifndef IPV4_H
 #define IPV4_H
 
-#include <cstdint>
 #include <stdint.h>
 
 /* --- IPv4 constants ---------------------------- */
@@ -34,4 +33,3 @@ struct ipv4_hdr {
 } __attribute__((packed));
 
 #endif
-#define IPV4_H
